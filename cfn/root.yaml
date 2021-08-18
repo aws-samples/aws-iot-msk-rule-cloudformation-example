@@ -1,0 +1,120 @@
+# Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+# SPDX-License-Identifier: MIT-0
+AWSTemplateFormatVersion: 2010-09-09
+
+Parameters:
+  EnvironmentName:
+    Description: Name added to created resources. Allowed pattern [a-zA-Z0-9]+
+    Type: String
+    AllowedPattern: "[a-zA-Z0-9]+"
+    ConstraintDescription: Malformed input-Parameter EnvironmentName must match pattern [A-Za-z0-9]+
+
+  VpcCIDR:
+    Description: Please enter the IP range (CIDR notation) for this VPC
+    Type: String
+    Default: 10.192.0.0/16
+
+  PublicSubnet1CIDR:
+    Description: Please enter the IP range (CIDR notation) for the public subnet in the first Availability Zone
+    Type: String
+    Default: 10.192.10.0/24
+
+  PublicSubnet2CIDR:
+    Description: Please enter the IP range (CIDR notation) for the public subnet in the second Availability Zone
+    Type: String
+    Default: 10.192.11.0/24
+
+  PrivateSubnet1CIDR:
+    Description: Please enter the IP range (CIDR notation) for the private subnet in the first Availability Zone
+    Type: String
+    Default: 10.192.20.0/24
+
+  PrivateSubnet2CIDR:
+    Description: Please enter the IP range (CIDR notation) for the private subnet in the second Availability Zone
+    Type: String
+    Default: 10.192.21.0/24
+  MSKUsername:
+    Description: Username for Amazon MSK SASL/SCRAM authentication. Password will be set automatically, and is accessible via AWS Secrets Manager
+    Type: String
+
+Resources:
+  VpcStack:
+    Type: AWS::CloudFormation::Stack
+    DeletionPolicy: Delete
+    Properties:
+      TemplateURL: https://s3.amazonaws.com/doronbl.msk-blog.cloudformation/vpc.yaml
+      Parameters:
+        EnvironmentName:
+          Ref: EnvironmentName
+        VpcCIDR:
+          Ref: VpcCIDR
+        PublicSubnet1CIDR:
+          Ref: PublicSubnet1CIDR
+        PublicSubnet2CIDR:
+          Ref: PublicSubnet2CIDR
+        PrivateSubnet1CIDR:
+          Ref: PrivateSubnet1CIDR
+        PrivateSubnet2CIDR:
+          Ref: PrivateSubnet2CIDR
+  MSKStack:
+    Type: AWS::CloudFormation::Stack
+    DeletionPolicy: Delete
+    Properties:
+      TemplateURL: https://s3.amazonaws.com/doronbl.msk-blog.cloudformation/msk.yaml
+      Parameters:
+        EnvironmentName:
+          Ref: EnvironmentName
+        PrivateSubnet1:
+          Fn::GetAtt: 
+          - VpcStack
+          - Outputs.PrivateSubnet1
+        PrivateSubnet2:
+          Fn::GetAtt: 
+          - VpcStack
+          - Outputs.PrivateSubnet2
+  SecretsStack:
+    Type: AWS::CloudFormation::Stack
+    DeletionPolicy: Delete
+    Properties:
+      TemplateURL: https://s3.amazonaws.com/doronbl.msk-blog.cloudformation/msk-sasl-secret.yaml
+      Parameters:
+        EnvironmentName:
+          Ref: EnvironmentName
+        MSKUsername:
+          Ref: MSKUsername
+        MSKClusterArn:
+          Fn::GetAtt: 
+          - MSKStack
+          - Outputs.MSKClusterArn
+  IoTStack:
+    Type: AWS::CloudFormation::Stack
+    DeletionPolicy: Delete
+    Properties:
+      TemplateURL: https://s3.amazonaws.com/doronbl.msk-blog.cloudformation/iot.yaml
+      Parameters:
+        EnvironmentName:
+          Ref: EnvironmentName
+        VpcId:
+          Fn::GetAtt: 
+          - VpcStack
+          - Outputs.VPC
+        PrivateSubnet1:
+          Fn::GetAtt: 
+          - VpcStack
+          - Outputs.PrivateSubnet1
+        PrivateSubnet2:
+          Fn::GetAtt: 
+          - VpcStack
+          - Outputs.PrivateSubnet2
+        SecurityGroup:
+          Fn::GetAtt:
+            - VpcStack
+            - Outputs.DefaultSecurityGroup
+        BootstrapServers:
+          Fn::GetAtt:
+            - MSKStack
+            - Outputs.BootstrapServers
+        IoTMSKSecretRuleRole:
+          Fn::GetAtt:
+            - SecretsStack
+            - Outputs.IoTMSKSecretRuleRole
