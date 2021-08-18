@@ -1,11 +1,12 @@
-## My Project
+## Integrating AWS IoT Core rules with Amazon Managed Streaming for Apache Kafka (MSK)
 
-TODO: Fill this README out!
+This repository include sample CloudFormation templates demonstrating AWS IoT Core rule action integration with Amazon MSK.
 
-Be sure to:
+For sake of completness, the root stack creates all required resources, such as: Amazon Virtual Private Cloud (Amazon VPC), Amazon MSK cluster, AWS IoT Core rule, AWS Secrets Manager, AWS Identity and Access Management (IAM).
 
-* Change the title in this README
-* Edit your repository description on GitHub
+To create all resources use the root.yaml template. It is possible to use each template seperatly, giving your existing resources as input to the relevant template.
+
+This example can be used as a starting point for production grade solution deployment.
 
 ## Security
 
