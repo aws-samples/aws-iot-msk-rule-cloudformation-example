@@ -36,7 +36,15 @@ Parameters:
   MSKUsername:
     Description: Username for Amazon MSK SASL/SCRAM authentication. Password will be set automatically, and is accessible via AWS Secrets Manager
     Type: String
-
+  MSKTopic:
+    Description: Amazon MSK topic name for publishing the rule messages. This topic will not be created as part of this stack. You will have to create it yourself.
+    Type: String
+    Default: msk_topic
+  IoTTopic:
+    Description: MQTT topic name for publishing the messages device messages. The AWS IoT Rule will subscribe to this topic.
+    Type: String
+    Default: mqtt_topic
+    
 Resources:
   VpcStack:
     Type: AWS::CloudFormation::Stack
@@ -118,3 +126,7 @@ Resources:
           Fn::GetAtt:
             - SecretsStack
             - Outputs.IoTMSKSecretRuleRole
+        MSKTopic:
+          Ref: MSKTopic
+        IoTTopic:
+          Ref: IoTTopic

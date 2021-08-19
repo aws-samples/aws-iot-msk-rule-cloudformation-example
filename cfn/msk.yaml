@@ -3,14 +3,14 @@
  
 AWSTemplateFormatVersion: 2010-09-09
 
-Description: MSK Cluster with required properties.
+Description: This template creates Amazon MSK Cluster with two brokers.
 
 Parameters:
   EnvironmentName:
     Description: An environment name that is prefixed to resource names
     Type: String
   PrivateSubnet1:
-    Description: First subnet for MSK broker
+    Description: First subnet forAmazon MSK broker
     Type: String
   PrivateSubnet2:
     Description: Second subnet for MSK broker

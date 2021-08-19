@@ -26,13 +26,19 @@ Parameters:
   IoTMSKSecretRuleRole:
     Description: Logical ID of IAM role used by Kafka rule action to access MSK credentials secret
     Type: String
+  MSKTopic:
+    Description: Amazon MSK topic name for publishing the rule messages. This topic will not be created as part of this stack. You will have to create it yourself.
+    Type: String
+  IoTTopic:
+    Description: MQTT topic name for publishing the messages device messages. The AWS IoT Rule will subscribe to this topic.
+    Type: String
     
 Resources:
 
   IoTCreateVpcENIRole:
     Type: AWS::IAM::Role
     Properties:
-      Description: Role for the IoT Rules engine to use when accessing MSK credentials in Secrets Manager
+      Description: Role used by AWS IoT Rules when accessing Amazon MSK credentials in Secrets Manager
       Path: /service-role/
       RoleName: !Sub "IoTCreateVpcENIRole-${EnvironmentName}"
       AssumeRolePolicyDocument:
@@ -100,7 +106,7 @@ Resources:
       RuleName: !Sub "IoT_MSK_Rule_${EnvironmentName}"
       TopicRulePayload: 
         Description: Rule to forward MQTT messages to MSK
-        Sql: SELECT * FROM 'iot/topic'
+        Sql: !Sub "SELECT * FROM '${IoTTopic}'"
         Actions:
           - Kafka:
               ClientProperties: 
@@ -126,4 +132,4 @@ Resources:
                                            - Ref: IoTMSKSecretRuleRole
                                            - '")}'
               DestinationArn: !GetAtt TopicRuleVpcDestination.Arn
-              Topic: test
+              Topic: !Ref MSKTopic
