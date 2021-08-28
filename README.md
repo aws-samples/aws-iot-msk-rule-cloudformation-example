@@ -8,6 +8,9 @@ To create all resources use the root.yaml template. It is possible to use each t
 
 This example can be used as a starting point for production grade solution deployment.
 
+### Architecture diagram
+![Architecture](img/iot-rule-msk.jpg)
+
 ### Notes
 The stack does not create the Amazon MSK topic itself. You will have to create the topic using standard tools.
 

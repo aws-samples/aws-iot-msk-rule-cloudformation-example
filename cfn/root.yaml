@@ -2,6 +2,14 @@
 # SPDX-License-Identifier: MIT-0
 AWSTemplateFormatVersion: 2010-09-09
 
+# This is the root template. It does not create any resources by itself,
+# instead, it calls nested stacks to perform the actual resource creation.
+# Parameters user can control are exposed on the root template and given as
+# input parameters to the nested stacks. You should be able to use each nested stack
+# as stan-alone if you will input it existing resources value as parameters.
+# These CloudFormation templates are for example and reference use, and should not be
+# considered production ready.
+
 Parameters:
   EnvironmentName:
     Description: Name added to created resources. Allowed pattern [a-zA-Z0-9]+
@@ -33,13 +41,16 @@ Parameters:
     Description: Please enter the IP range (CIDR notation) for the private subnet in the second Availability Zone
     Type: String
     Default: 10.192.21.0/24
+    
   MSKUsername:
     Description: Username for Amazon MSK SASL/SCRAM authentication. Password will be set automatically, and is accessible via AWS Secrets Manager
     Type: String
+    
   MSKTopic:
     Description: Amazon MSK topic name for publishing the rule messages. This topic will not be created as part of this stack. You will have to create it yourself.
     Type: String
     Default: msk_topic
+    
   IoTTopic:
     Description: MQTT topic name for publishing the messages device messages. The AWS IoT Rule will subscribe to this topic.
     Type: String
@@ -64,6 +75,7 @@ Resources:
           Ref: PrivateSubnet1CIDR
         PrivateSubnet2CIDR:
           Ref: PrivateSubnet2CIDR
+  
   MSKStack:
     Type: AWS::CloudFormation::Stack
     DeletionPolicy: Delete
@@ -72,6 +84,10 @@ Resources:
       Parameters:
         EnvironmentName:
           Ref: EnvironmentName
+        VpcId:
+          Fn::GetAtt: 
+          - VpcStack
+          - Outputs.VPC
         PrivateSubnet1:
           Fn::GetAtt: 
           - VpcStack
