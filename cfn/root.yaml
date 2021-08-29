@@ -132,8 +132,8 @@ Resources:
           - Outputs.PrivateSubnet2
         SecurityGroup:
           Fn::GetAtt:
-            - VpcStack
-            - Outputs.DefaultSecurityGroup
+            - MSKStack
+            - Outputs.MSKSecurityGroup
         BootstrapServers:
           Fn::GetAtt:
             - MSKStack

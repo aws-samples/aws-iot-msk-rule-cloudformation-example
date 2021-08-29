@@ -145,3 +145,6 @@ Outputs:
   BootstrapServers:
     Description: MSK Bootstrap Servers
     Value: !GetAtt BootstrapBrokers.BootstrapBrokerStringSaslScram
+  MSKSecurityGroup:
+    Description: Security group for clients to connect to the cluster
+    Value: !Ref MSKSecurityGroup
