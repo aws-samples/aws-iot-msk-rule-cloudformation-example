@@ -44,6 +44,7 @@ Parameters:
     
   MSKUsername:
     Description: Username for Amazon MSK SASL/SCRAM authentication. Password will be set automatically, and is accessible via AWS Secrets Manager
+    Default: msk
     Type: String
     
   MSKTopic:
